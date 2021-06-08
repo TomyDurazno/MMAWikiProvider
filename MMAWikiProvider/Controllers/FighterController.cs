@@ -1,11 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using UFCWikiProvider.Logic;
-using UFCWikiProvider.Models;
 
 namespace UFCWikiProvider.Controllers
 {
@@ -13,9 +8,9 @@ namespace UFCWikiProvider.Controllers
     public class FightersController : ControllerBase
     {
         private readonly ILogger<FightersController> _logger;
-        private readonly IFighterListHandler handler;
+        private readonly IFighterStoreHandler handler;
 
-        public FightersController(ILogger<FightersController> logger, IFighterListHandler handler)
+        public FightersController(ILogger<FightersController> logger, IFighterStoreHandler handler)
         {
             _logger = logger;
             this.handler = handler;

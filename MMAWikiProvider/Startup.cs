@@ -1,17 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using UFCWikiProvider.Logic;
 
 namespace UFCWikiProvider
@@ -30,7 +22,8 @@ namespace UFCWikiProvider
         {
             services.AddControllers()
                     .AddJsonOptions(o => {
-                        o.JsonSerializerOptions.WriteIndented = true; });
+                        o.JsonSerializerOptions.WriteIndented = true;                     
+                    });
 
             services.AddSwaggerGen(c =>
             {
@@ -46,9 +39,9 @@ namespace UFCWikiProvider
 
             services.AddSingleton<IWikiProvider, WikiProvider>();
 
-            services.AddSingleton<IFighterListHandler, FighterListHandler>();
+            services.AddSingleton<IFighterStoreHandler, FighterStoreHandler>();
 
-            services.AddHostedService<FighterListConsumer>();
+            services.AddHostedService<FighterStoreInitConsumer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

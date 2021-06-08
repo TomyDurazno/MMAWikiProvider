@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UFCWikiProvider.Models;
 
 namespace UFCWikiProvider.Logic
 {
-    public interface IFighterListHandler
+    public interface IFighterStoreHandler
     {
         public void Init(ConcurrentDictionary<string, Fighter> fighters);
         public IEnumerable<Fighter> GetValues();
@@ -17,7 +15,7 @@ namespace UFCWikiProvider.Logic
         public List<Fighter> FightersByName(string name);
     }
 
-    public class FighterListHandler : IFighterListHandler
+    public class FighterStoreHandler : IFighterStoreHandler
     {
         ConcurrentDictionary<string, Fighter> fighters;
 
@@ -28,9 +26,7 @@ namespace UFCWikiProvider.Logic
 
         public IEnumerable<Fighter> GetValues() => fighters.Select(v => v.Value);
 
-        public Fighter GetFighter(string name)
-        => GetValues()
-            .FirstOrDefault(f => f.EqualsName(name));
+        public Fighter GetFighter(string name) => GetValues().FirstOrDefault(f => f.EqualsName(name));
 
         public List<Fighter> FightersByName(string name)
         {

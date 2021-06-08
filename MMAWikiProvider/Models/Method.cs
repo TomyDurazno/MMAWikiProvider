@@ -28,7 +28,6 @@ namespace UFCWikiProvider.Models
         public string Description { get; set; }
         public MethodType Type { get; set; }
 
-
         public EffectiveMethodType EffectiveType()
         {
             if (IsKO_TKO())

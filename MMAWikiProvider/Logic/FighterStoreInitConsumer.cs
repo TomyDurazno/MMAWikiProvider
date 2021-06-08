@@ -12,13 +12,13 @@ using UFCWikiProvider.Models;
 
 namespace UFCWikiProvider.Logic
 {
-    public class FighterListConsumer : BackgroundService
+    public class FighterStoreInitConsumer : BackgroundService
     {
-        IFighterListHandler handler;
+        IFighterStoreHandler handler;
         string wikiJsonPath = $"{AppContext.BaseDirectory.Split("bin")[0]}ufcwiki.json";
-        ILogger<FighterListConsumer> logger;
+        ILogger<FighterStoreInitConsumer> logger;
 
-        public FighterListConsumer(IFighterListHandler handler, ILogger<FighterListConsumer> logger)
+        public FighterStoreInitConsumer(IFighterStoreHandler handler, ILogger<FighterStoreInitConsumer> logger)
         {
             this.handler = handler;
             this.logger = logger;
