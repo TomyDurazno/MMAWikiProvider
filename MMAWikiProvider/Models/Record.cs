@@ -244,7 +244,8 @@ namespace UFCWikiProvider.Models
 
         public static int KOTKO(this List<RecordRow> record) => record.Count(r => r.Method.IsKO_TKO());
 
-        public static int WonOrDefendedUFCChampionship(this List<RecordRow> record) => record.Count(r => r.Notes.DefendedUFCChampionship) + record.Count(r => r.Notes.WonUFCChampionship);
+        public static int WonOrDefendedUFCChampionship(this List<RecordRow> record) => record.Count(r => r.Notes.DefendedUFCChampionship == true) + 
+                                                                                       record.Count(r => r.Notes.WonUFCChampionship == true);
     }
 
     #endregion

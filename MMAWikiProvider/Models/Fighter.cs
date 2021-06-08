@@ -7,8 +7,6 @@ namespace UFCWikiProvider.Models
 {
     public class Fighter
     {
-        public string RealName() => Name.Replace("_(fighter)", string.Empty);
-
         //Wikipedia suffix name, can have '_(fighter)' 
         public string Name { get; set; }
 
@@ -24,6 +22,29 @@ namespace UFCWikiProvider.Models
             Name = s;
             Record = new List<RecordRow>();
         }
+
+        public bool EqualsName(string name) => KeyName().Equals(Replace(name));
+
+
+        public bool ContainsName(string name) => KeyName().Contains(Replace(name));
+
+        string Replace(string x) => x.Replace("_(fighter)", string.Empty)
+                                     .Replace("_", " ")
+                                     .ToLower();
+
+        public string KeyName() => Replace(Name);
+
+        public override bool Equals(object obj)
+        {
+            var sobj = obj as Fighter;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            return KeyName() == sobj.KeyName();
+        }
+
+        public override int GetHashCode() => HashCode.Combine(KeyName());
 
         public static Fighter Parse(string name, IEnumerable<IEnumerable<string>> rows)
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace UFCWikiProvider.Models
@@ -12,6 +13,7 @@ namespace UFCWikiProvider.Models
         Decision
     }
 
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum MethodType
     {
         KO,

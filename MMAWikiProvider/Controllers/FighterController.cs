@@ -10,31 +10,39 @@ using UFCWikiProvider.Models;
 namespace UFCWikiProvider.Controllers
 {
     [ApiController]
-    public class FighterController : ControllerBase
+    public class FightersController : ControllerBase
     {
-        private readonly ILogger<FighterController> _logger;
+        private readonly ILogger<FightersController> _logger;
         private readonly IFighterListHandler handler;
 
-        public FighterController(ILogger<FighterController> logger, IFighterListHandler handler)
+        public FightersController(ILogger<FightersController> logger, IFighterListHandler handler)
         {
             _logger = logger;
             this.handler = handler;
         }
 
-        [Route("Fighter/{name}")]
-        public async Task<Fighter> Get(string name)
+        [Route("fighters/{name}")]
+        [HttpGet]
+        public IActionResult Get(string name)
         {
-            try
-            {
-                var fighter = handler.GetFighter(name);
+            var fighter = handler.GetFighter(name);
 
-                return fighter;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation(ex.ToString());
-                return null;
-            }
+            if (fighter == null)
+                return NotFound();
+
+            return Ok(fighter);
+        }
+
+        [Route("fighters/byname/{name}")]
+        [HttpGet]
+        public IActionResult GetByName(string name)
+        {
+            var fighters = handler.FightersByName(name);
+
+            if (fighters == null)
+                return NotFound();
+
+            return Ok(fighters);
         }
     }
 }

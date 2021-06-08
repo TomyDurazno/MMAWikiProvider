@@ -13,6 +13,8 @@ namespace UFCWikiProvider.Logic
         public IEnumerable<Fighter> GetValues();
 
         public Fighter GetFighter(string name);
+
+        public List<Fighter> FightersByName(string name);
     }
 
     public class FighterListHandler : IFighterListHandler
@@ -27,10 +29,14 @@ namespace UFCWikiProvider.Logic
         public IEnumerable<Fighter> GetValues() => fighters.Select(v => v.Value);
 
         public Fighter GetFighter(string name)
-        {
-            string Replace(string s) => s.Replace("_", string.Empty).Replace("_(fighter)", string.Empty);
+        => GetValues()
+            .FirstOrDefault(f => f.EqualsName(name));
 
-            return GetValues().FirstOrDefault(f => Replace(f.Name) == Replace(name));
+        public List<Fighter> FightersByName(string name)
+        {
+            return GetValues()
+                    .Where(f => f.ContainsName(name))
+                    .ToList();
         }
     }
 }

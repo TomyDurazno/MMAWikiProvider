@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace UFCWikiProvider.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Bonus
-    {
+    {        
         FightOfTheNight,
         PerformanceOfTheNight,
         KnockoutOfTheNight,
@@ -112,32 +114,43 @@ namespace UFCWikiProvider.Models
 
         //public KeyValuePair<string, string> TestedPositiveFor => MatchesTestedPositiveFor();
 
-        public bool LaterPromotedToUndisputedChampion => Value.Contains(Patterns.laterPromotedToUndisputedChampion);
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LaterPromotedToUndisputedChampion => Value.Contains(Patterns.laterPromotedToUndisputedChampion) ? true : null;
 
-        public bool LaterPromotedToUFCChampion => Value.Matches(Patterns.laterPromotedToUFCChampion).IsNotEmpty();
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LaterPromotedToUFCChampion => Value.Matches(Patterns.laterPromotedToUFCChampion).IsNotEmpty() ? true : null;
 
-        public bool LostUFCChampionship => Value.Matches(Patterns.lostUFCChampionship).IsNotEmpty();
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LostUFCChampionship => Value.Matches(Patterns.lostUFCChampionship).IsNotEmpty() ? true : null;
 
-        public bool WonOrDefendedUFCChampionship => WonUFCChampionship || DefendedUFCChampionship;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? WonOrDefendedUFCChampionship => (WonUFCChampionship == true) || (DefendedUFCChampionship == true) ? true : null;
 
-        public bool WonUFCChampionship => WonUndisputedUFCChampionship || WonInterimUFCChampionship;
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? WonUFCChampionship => (WonUndisputedUFCChampionship.HasValue || WonInterimUFCChampionship.HasValue) ? true : null;
 
-        public bool WonInterimUFCChampionship => Value.Matches(Patterns.wonInterimUFCChampionship).IsNotEmpty();
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? WonInterimUFCChampionship => Value.Matches(Patterns.wonInterimUFCChampionship).IsNotEmpty() ? true : null;
 
-        public bool WonUndisputedUFCChampionship => Value.Matches(Patterns.wonUFCChampionship).IsNotEmpty() ||
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? WonUndisputedUFCChampionship => (Value.Matches(Patterns.wonUFCChampionship).IsNotEmpty()  ||
                                           Value.Matches(Patterns.wonAndUnifiedUFCChampionship).IsNotEmpty() ||
-                                          Value.Matches(Patterns.wonVacantUFCChampionship).IsNotEmpty();
+                                          Value.Matches(Patterns.wonVacantUFCChampionship).IsNotEmpty()) ? true : null;
 
-        public bool DefendedUFCChampionship => Value.Matches(Patterns.defendedUFCChampionship).IsNotEmpty() ||
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? DefendedUFCChampionship => (Value.Matches(Patterns.defendedUFCChampionship).IsNotEmpty() ||
                                                Value.Matches(Patterns.defendedAndUnifiedUFCChampionship).IsNotEmpty() ||
-                                               Value.Matches(Patterns.retainedUFCChampionship).IsNotEmpty();
+                                               Value.Matches(Patterns.retainedUFCChampionship).IsNotEmpty()) ? true : null;
 
-        public bool IsUFCChampionshipBout { get => Value.Matches(Patterns.ufcChampionship).IsNotEmpty(); }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? IsUFCChampionshipBout { get => Value.Matches(Patterns.ufcChampionship).IsNotEmpty() ? true : null; }
 
         public IEnumerable<Bonus> Bonuses { get => GetBonus(); }
 
-        public bool BothBonus => Bonuses.Contains(Bonus.FightOfTheNight) &&
-                                (Bonuses.Contains(Bonus.PerformanceOfTheNight) || Bonuses.Contains(Bonus.KnockoutOfTheNight) || Bonuses.Contains(Bonus.SubmissionOfTheNight));
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? BothBonus => (Bonuses.Contains(Bonus.FightOfTheNight) &&
+                                (Bonuses.Contains(Bonus.PerformanceOfTheNight) || Bonuses.Contains(Bonus.KnockoutOfTheNight) || Bonuses.Contains(Bonus.SubmissionOfTheNight))) ? true : null;
+        
         public string Value { get; set; }
 
         #endregion
