@@ -1,0 +1,46 @@
+Status 1:
+
+	- Props:
+
+		Res.	
+		Record	
+		Opponent	
+		Method	
+		Event	
+		Date	
+		Round	
+		Time	
+		Location	
+		Notes
+	
+	Res.
+		
+		Resultado: Loss | Win | Draw,
+		Record: Win-Loss-(Draw),
+		Opponent: @UFC Fighter,
+		Method: 
+			KO | TKO 
+			Submission
+			Decision
+		Event: @UFC Event
+		Date: "24 January 2021"
+		Round: 
+			3
+			5: Championship
+		Time: 0:00
+		Location
+			City, Country
+			City, State, Country
+		Notes:
+			None,
+			Other Category Bout,
+			Bonus:
+				Performance of the Night
+				((Submission | KO) of the Night
+				Championship Bout (Won Championship Weight) -> "	Won the Cage Warriors Lightweight Championship."
+				Extra Notes
+				
+			
+			
+		
+		
