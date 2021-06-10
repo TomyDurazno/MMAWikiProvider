@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-namespace UFCWikiProvider.Models
+namespace MMAWikiProvider.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Bonus
@@ -164,6 +164,8 @@ namespace UFCWikiProvider.Models
         {
             Value = s.Trim();
         }
+
+        public RecordNotes Clone() => new RecordNotes(Value);
 
         #endregion
     }

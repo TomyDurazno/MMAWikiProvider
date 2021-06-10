@@ -40,7 +40,16 @@ Status 1:
 				Championship Bout (Won Championship Weight) -> "	Won the Cage Warriors Lightweight Championship."
 				Extra Notes
 				
+Status 2:
+
+	Wishlist:
 			
-			
+		- Rebuilder in background -> 75 %
+		
+		- Add Features to WikiParser (contextual Data, Pictures, Fighter profile table)
+	
+		- MVC Viewer with amCharts stats (ver ElaAdmin template)
+		
+		
 		
 		

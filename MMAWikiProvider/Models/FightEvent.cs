@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace UFCWikiProvider.Models
+namespace MMAWikiProvider.Models
 {
     public class FightEvent
     {
@@ -29,5 +29,7 @@ namespace UFCWikiProvider.Models
         {
             Description = s.Trim();
         }
+
+        public FightEvent Clone() => new FightEvent(Description);
     }
 }

@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace UFCWikiProvider.Models
+namespace MMAWikiProvider.Models
 {
     public enum FightResult
     {
@@ -42,6 +42,20 @@ namespace UFCWikiProvider.Models
         public RecordRow()
         {
 
+        }
+
+        public RecordRow(RecordRow r)
+        {
+            Result = r.Result;
+            Record = r.Record;
+            Opponent = r.Opponent.Clone();
+            Method = r.Method.Clone();
+            Event = r.Event.Clone();
+            Date = r.Date;
+            Round = r.Round;
+            Time = r.Time;
+            Location = r.Location.Clone();
+            Notes = r.Notes.Clone();
         }
 
         public RecordRow(string[] row)
@@ -117,6 +131,22 @@ namespace UFCWikiProvider.Models
             Notes = new RecordNotes(row[9]);
 
             #endregion
+        }
+
+        public RecordRow Clone() => new RecordRow(this);
+
+        public TimeSpan? ElapsedTime
+        {
+            get
+            {
+                if(Round.HasValue && Time.HasValue)
+                {
+                    var rounds = Round.Value - 1;
+                    return TimeSpan.FromMinutes(rounds * 5) + Time.Value;
+                }
+                
+                return default;
+            }
         }
     }
 
@@ -246,6 +276,11 @@ namespace UFCWikiProvider.Models
 
         public static int WonOrDefendedUFCChampionship(this List<RecordRow> record) => record.Count(r => r.Notes.DefendedUFCChampionship == true) + 
                                                                                        record.Count(r => r.Notes.WonUFCChampionship == true);
+        public static int WinLoseRatio(this List<RecordRow> record) => record.Count(r => r.Result == FightResult.Win) - record.Count(r => r.Result == FightResult.Loss);
+
+        public static int UFCFights(this List<RecordRow> record) => record.Count(r => r.Event.IsUFCEvent);
+
+        public static void Clear(this List<RecordRow> record) => record.ForEach(r => r.Opponent.Record = null);
     }
 
     #endregion

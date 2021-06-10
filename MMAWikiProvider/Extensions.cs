@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace UFCWikiProvider
+namespace MMAWikiProvider
 {
     public static class Extensions
     {

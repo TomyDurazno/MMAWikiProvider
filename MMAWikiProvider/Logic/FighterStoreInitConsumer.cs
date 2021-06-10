@@ -8,9 +8,9 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using UFCWikiProvider.Models;
+using MMAWikiProvider.Models;
 
-namespace UFCWikiProvider.Logic
+namespace MMAWikiProvider.Logic
 {
     public class FighterStoreInitConsumer : BackgroundService
     {
@@ -29,7 +29,7 @@ namespace UFCWikiProvider.Logic
             try
             {
                 var values = JsonSerializer.Deserialize<List<Fighter>>(File.ReadAllText(wikiJsonPath));
-                handler.Init(new ConcurrentDictionary<string, Fighter>(values.ToDictionary(v => v.Name, v => v)));
+                handler.Init(values.ToDictionary(v => v.Name, v => v));
             }
             catch (Exception ex)
             {

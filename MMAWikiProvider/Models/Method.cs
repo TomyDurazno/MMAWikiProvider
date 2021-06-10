@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace UFCWikiProvider.Models
+namespace MMAWikiProvider.Models
 {
     public enum EffectiveMethodType
     {
@@ -46,6 +46,12 @@ namespace UFCWikiProvider.Models
         
         }
 
+        public Method(Method m)
+        {
+            Description = m.Description;
+            Type = m.Type;
+        }
+
         public Method(string s)
         {
             var auxs = s.Trim();
@@ -69,5 +75,7 @@ namespace UFCWikiProvider.Models
 
             Description = Description ?? string.Empty;
         }
+
+        public Method Clone() => new Method(this);
     }
 }

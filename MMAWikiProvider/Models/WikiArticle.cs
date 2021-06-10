@@ -1,13 +1,14 @@
-﻿using System;
+﻿using MMAWikiProvider.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace UFCWikiProvider.Models
+namespace MMAWikiProvider.Models
 {
     public class WikiArticle
     {
         public string Name { get; set; }
+        public WikiBio Bio { get; set; }
+
 
         public WikiArticle(string name, IEnumerable<string[]> record)
         {

@@ -4,9 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using UFCWikiProvider.Logic;
+using MMAWikiProvider.Logic;
+using MMAWikiProvider.Logic;
 
-namespace UFCWikiProvider
+namespace MMAWikiProvider
 {
     public class Startup
     {
@@ -40,6 +41,8 @@ namespace UFCWikiProvider
             services.AddSingleton<IWikiProvider, WikiProvider>();
 
             services.AddSingleton<IFighterStoreHandler, FighterStoreHandler>();
+
+            services.AddSingleton<IFighterStats, FighterStats>();
 
             services.AddHostedService<FighterStoreInitConsumer>();
         }

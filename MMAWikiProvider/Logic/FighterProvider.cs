@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UFCWikiProvider.Models;
+using MMAWikiProvider.Models;
 
-namespace UFCWikiProvider.Logic
+namespace MMAWikiProvider.Logic
 {
     public interface IFighterProvider
     {

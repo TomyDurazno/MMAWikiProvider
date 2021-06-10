@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace UFCWikiProvider.Models
+namespace MMAWikiProvider.Models
 {
     public class Fighter
     {
         //Wikipedia suffix name, can have '_(fighter)' 
         public string Name { get; set; }
 
-        public List<RecordRow> Record { get; set; }
+        public List<RecordRow> Record { get; set; }        
 
         public Fighter()
         {
@@ -21,6 +22,12 @@ namespace UFCWikiProvider.Models
         {
             Name = s;
             Record = new List<RecordRow>();
+        }
+
+        Fighter(Fighter f)
+        {
+            Name = f.Name;
+            Record = f.Record.Select(r => r.Clone()).ToList();
         }
 
         public bool EqualsName(string name) => KeyName().Equals(Replace(name));
@@ -95,5 +102,28 @@ namespace UFCWikiProvider.Models
 
             return fighter;
         }
+
+        public Fighter Clone() => new Fighter(this);
+
+        #region Grouppers
+
+        public IDictionary<string, object> BonusGroup()
+        {
+            var exp = new ExpandoObject() as IDictionary<string, object>;
+
+            var grouped =  Record.Where(r => r.Notes.Bonuses.Any())
+                           .GroupBy(r => r.Method.Type)
+                           .OrderByDescending(g => g.Count());
+
+
+            exp.Add("Total", grouped.Sum(g => g.Count()));
+
+            foreach (var g in grouped)
+                exp.Add(g.Key.ToString(), g.Count());
+
+            return exp;
+        }
+
+        #endregion
     }
 }

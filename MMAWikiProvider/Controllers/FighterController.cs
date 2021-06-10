@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using UFCWikiProvider.Logic;
+using MMAWikiProvider.Logic;
 
-namespace UFCWikiProvider.Controllers
+namespace MMAWikiProvider.Controllers
 {
     [ApiController]
     public class FightersController : ControllerBase

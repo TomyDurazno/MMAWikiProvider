@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace UFCWikiProvider.Models
+namespace MMAWikiProvider.Models
 {
     public class Location
     {
@@ -18,6 +18,13 @@ namespace UFCWikiProvider.Models
         public Location()
         {
 
+        }
+
+        public Location(Location l)
+        {
+            City = l.City;
+            Country = l.Country;
+            State = l.State;
         }
 
         public Location(string s)
@@ -60,5 +67,7 @@ namespace UFCWikiProvider.Models
         public override int GetHashCode() => HashCode.Combine(Country, State, City);
 
         public override bool Equals(object obj) => GetHashCode() == obj.GetHashCode();
+
+        public Location Clone() => new Location(this);
     }
 }

@@ -17,9 +17,10 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "UFCWikiProvider": {
+    "MMAWikiProvider": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
