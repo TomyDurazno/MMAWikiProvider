@@ -113,7 +113,7 @@ namespace MMAWikiProvider.Models
 
             #region Time
 
-            if (TimeSpan.TryParse(row[7], out var span))
+            if (TimeSpan.TryParse($"00:{row[7]}", out var span))
             {
                 Time = span;
             }
@@ -264,23 +264,26 @@ namespace MMAWikiProvider.Models
 
     public static class RecordExtensions
     {
-        public static int Wins(this List<RecordRow> record) => record.Count(r => r.Result == FightResult.Win);
+        public static int Wins(this IEnumerable<RecordRow> record) => record.Count(r => r.Result == FightResult.Win);
 
-        public static int Losses(this List<RecordRow> record) => record.Count(r => r.Result == FightResult.Loss);
+        public static int Losses(this IEnumerable<RecordRow> record) => record.Count(r => r.Result == FightResult.Loss);
 
-        public static int Draws(this List<RecordRow> record) => record.Count(r => r.Result == FightResult.Draw);
+        public static int Draws(this IEnumerable<RecordRow> record) => record.Count(r => r.Result == FightResult.Draw);
 
-        public static int Submissions(this List<RecordRow> record) => record.Count(r => r.Method.IsSubmission());
+        public static int Submissions(this IEnumerable<RecordRow> record) => record.Count(r => r.Method.IsSubmission());
 
-        public static int KOTKO(this List<RecordRow> record) => record.Count(r => r.Method.IsKO_TKO());
+        public static int KOTKO(this IEnumerable<RecordRow> record) => record.Count(r => r.Method.IsKO_TKO());
 
-        public static int WonOrDefendedUFCChampionship(this List<RecordRow> record) => record.Count(r => r.Notes.DefendedUFCChampionship == true) + 
+        public static int WonOrDefendedUFCChampionship(this IEnumerable<RecordRow> record) => record.Count(r => r.Notes.DefendedUFCChampionship == true) + 
                                                                                        record.Count(r => r.Notes.WonUFCChampionship == true);
-        public static int WinLoseRatio(this List<RecordRow> record) => record.Count(r => r.Result == FightResult.Win) - record.Count(r => r.Result == FightResult.Loss);
+        public static int WinLoseRatio(this IEnumerable<RecordRow> record) => record.Count(r => r.Result == FightResult.Win) - record.Count(r => r.Result == FightResult.Loss);
 
-        public static int UFCFights(this List<RecordRow> record) => record.Count(r => r.Event.IsUFCEvent);
+        public static int UFCFights(this IEnumerable<RecordRow> record) => record.Count(r => r.Event.IsUFCEvent);
 
         public static void Clear(this List<RecordRow> record) => record.ForEach(r => r.Opponent.Record = null);
+
+        public static TimeSpan ElapsedTime(this IEnumerable<RecordRow> record) => record.Where(r => r.ElapsedTime.HasValue).Sum(r => r.ElapsedTime.Value);
+
     }
 
     #endregion

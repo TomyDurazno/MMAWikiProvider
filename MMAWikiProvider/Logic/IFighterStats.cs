@@ -12,11 +12,11 @@ namespace MMAWikiProvider.Logic
     {
         public int BuchholzRatio(string name);
 
-        public Task<IEnumerable<Fighter>> TopBy(int number, Func<Fighter, int> By);
+        public Task<IEnumerable<Fighter>> TopBy<T>(int number, Func<Fighter, T> By);
 
-        public Task<IDictionary<string, object>> TopByDic(int number, Func<Fighter, int> By);
+        public Task<IDictionary<string, object>> TopByDic<T>(int number, Func<Fighter, T> By);
 
-        public Task<IDictionary<string, object>> TopByDic<T>(int number, Func<Fighter, int> By, Func<Fighter, T> Proj);
+        public Task<IDictionary<string, object>> TopByDic<T, K>(int number, Func<Fighter, T> By, Func<Fighter, K> Proj);
     }
 
     public class FighterStats : IFighterStats
@@ -36,7 +36,7 @@ namespace MMAWikiProvider.Logic
 
         #region TopBy
 
-        public async Task<IEnumerable<Fighter>> TopBy(int number, Func<Fighter, int> By)
+        public async Task<IEnumerable<Fighter>> TopBy<T>(int number, Func<Fighter, T> By)
         {
             var state = fighterStore.ConcurrentState;
 
@@ -60,7 +60,7 @@ namespace MMAWikiProvider.Logic
                               .Take(number);
         }
 
-        public async Task<IDictionary<string, object>> TopByDic(int number, Func<Fighter, int> By)
+        public async Task<IDictionary<string, object>> TopByDic<T>(int number, Func<Fighter, T> By)
         {
             var top = await TopBy(number, By);
 
@@ -72,7 +72,7 @@ namespace MMAWikiProvider.Logic
             return exp;
         }
 
-        public async Task<IDictionary<string, object>> TopByDic<T>(int number, Func<Fighter, int> By, Func<Fighter, T> Proj)
+        public async Task<IDictionary<string, object>> TopByDic<T, K>(int number, Func<Fighter, T> By, Func<Fighter, K> Proj)
         {
             var top = await TopBy(number, By);
 

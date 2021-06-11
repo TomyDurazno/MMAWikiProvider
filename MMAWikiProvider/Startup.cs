@@ -36,15 +36,17 @@ namespace MMAWikiProvider
                 });
             });
 
-            services.AddSingleton<IFighterProvider, FighterProvider>();
-
             services.AddSingleton<IWikiProvider, WikiProvider>();
+
+            services.AddSingleton<IFighterProvider, FighterProvider>();
 
             services.AddSingleton<IFighterStoreHandler, FighterStoreHandler>();
 
             services.AddSingleton<IFighterStats, FighterStats>();
 
-            services.AddHostedService<FighterStoreInitConsumer>();
+            services.AddHostedService<FightStoreRebuilder>();
+
+            //services.AddHostedService<FighterStoreInitConsumer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

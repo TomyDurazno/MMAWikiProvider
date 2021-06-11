@@ -63,7 +63,19 @@ namespace MMAWikiProvider.Controllers
         [HttpGet]
         public async Task<IActionResult> TopByUFCEvents(int number)
         {
-            var dic = await stats.TopByDic(number, f => f.Record.Count(r => r.Event.IsUFCEvent));
+            var dic = await stats.TopByDic(number, f => f.Record.Count(r => r.Event.IsUFCEvent), 
+                                                        f => f.Record.Where(r => r.Event.IsUFCEvent)
+                                                                     .Select(r => r.Event.Description));
+
+            return Ok(dic);
+        }
+
+        [Route("stats/top/{number}/ufcfighters/byoctagontime")]
+        [HttpGet]
+        public async Task<IActionResult> TopByElapsedTime(int number)
+        {
+            var dic = await stats.TopByDic(number, f => f.Record.Where(r => r.Event.IsUFCEvent).ElapsedTime(), 
+                                                   f => f.Record.Where(r => r.Event.IsUFCEvent).ElapsedTime().ToString("hh':'mm':'ss"));
 
             return Ok(dic);
         }
@@ -85,6 +97,36 @@ namespace MMAWikiProvider.Controllers
 
             return Ok(dic);
         }
+
+        [Route("stats/top/{number}/ufcfighters/byknockouts")]
+        [HttpGet]
+        public async Task<IActionResult> TopByKnockouts(int number)
+        {
+            var dic = await stats.TopByDic(number, f => f.Record.Sum(r => r.Event.IsUFCEvent && r.Method.IsKO_TKO() && r.Result == FightResult.Win ? 1 : 0));
+
+            return Ok(dic);
+        }
+
+        [Route("stats/top/{number}/ufcfighters/bysubmissions")]
+        [HttpGet]
+        public async Task<IActionResult> TopBySubmissions(int number)
+        {
+            var dic = await stats.TopByDic(number, f => f.Record.Sum(r => r.Event.IsUFCEvent && r.Method.IsSubmission() && r.Result == FightResult.Win ? 1 : 0));
+
+            return Ok(dic);
+        }
+
+
+        [Route("stats/top/{number}/ufcfighters/byeyepokes")]
+        [HttpGet]
+        public async Task<IActionResult> TopByEyepokes(int number)
+        {
+            var dic = await stats.TopByDic(number, f => f.Record.Sum(r => r.Event.IsUFCEvent && r.Method.Description.Contains("eye poke") ? 1 : 0));
+
+            return Ok(dic);
+        }
+
+        //eye poke
 
         [Route("stats/buchholzratio/{name}")]
         [HttpGet]

@@ -10,7 +10,7 @@ namespace MMAWikiProvider.Logic
 {
     public interface IFighterStoreHandler
     {
-        public void Init(Dictionary<string, Fighter> fighters);
+        public void Init(IDictionary<string, Fighter> fighters);
 
         public Fighter GetFighter(string name);
 
@@ -25,9 +25,9 @@ namespace MMAWikiProvider.Logic
 
     public class FighterStoreHandler : IFighterStoreHandler
     {
-        Dictionary<string, Fighter> fighters;
+        IDictionary<string, Fighter> fighters;
 
-        public void Init(Dictionary<string, Fighter> fighters)
+        public void Init(IDictionary<string, Fighter> fighters)
         {
             this.fighters = fighters;
         }

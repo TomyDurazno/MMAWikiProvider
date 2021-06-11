@@ -31,5 +31,10 @@ namespace MMAWikiProvider
             else
                 return string.Empty;
         }
+
+        public static TimeSpan Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, TimeSpan> func)
+        {
+            return new TimeSpan(source.Sum(item => func(item).Ticks));
+        }
     }
 }
