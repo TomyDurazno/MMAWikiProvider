@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using MMAWikiProvider.Logic;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MMAWikiProvider.Logic;
 using MMAWikiProvider.Models;
 
@@ -116,7 +115,6 @@ namespace MMAWikiProvider.Controllers
             return Ok(dic);
         }
 
-
         [Route("stats/top/{number}/ufcfighters/byeyepokes")]
         [HttpGet]
         public async Task<IActionResult> TopByEyepokes(int number)
@@ -124,9 +122,7 @@ namespace MMAWikiProvider.Controllers
             var dic = await stats.TopByDic(number, f => f.Record.Sum(r => r.Event.IsUFCEvent && r.Method.Description.Contains("eye poke") ? 1 : 0));
 
             return Ok(dic);
-        }
-
-        //eye poke
+        }        
 
         [Route("stats/buchholzratio/{name}")]
         [HttpGet]

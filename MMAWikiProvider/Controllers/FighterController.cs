@@ -7,12 +7,12 @@ namespace MMAWikiProvider.Controllers
     [ApiController]
     public class FightersController : ControllerBase
     {
-        private readonly ILogger<FightersController> _logger;
+        private readonly ILogger<FightersController> logger;
         private readonly IFighterStoreHandler handler;
 
         public FightersController(ILogger<FightersController> logger, IFighterStoreHandler handler)
         {
-            _logger = logger;
+            this.logger = logger;
             this.handler = handler;
         }
 

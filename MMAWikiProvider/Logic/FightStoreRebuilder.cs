@@ -7,9 +7,10 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using MMAWikiProvider.Models;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using MMAWikiProvider.Models;
+using MMAWikiProvider.Extensions;
 
 namespace MMAWikiProvider.Logic
 {
@@ -17,10 +18,14 @@ namespace MMAWikiProvider.Logic
     {
         IFighterStoreHandler handler;
         IFighterProvider fighterProvider;
-        string wikiJsonPath = $"{AppContext.BaseDirectory.Split("bin")[0]}TEST/ufcwiki.json";
-        string missingPath = $"{AppContext.BaseDirectory.Split("bin")[0]}TEST/missing.json";
-        string failedwikifetchPath = $"{AppContext.BaseDirectory.Split("bin")[0]}TEST/failedwikifetch.json";
-        string runsPath = $"{AppContext.BaseDirectory.Split("bin")[0]}TEST/runs.json";
+        static string baseFolder = $"{AppContext.BaseDirectory.Split("bin")[0]}TEST";
+
+        string wikiJsonPath = $"{baseFolder}/ufcwiki.json";
+        string missingPath = $"{baseFolder}/missing.json";
+        string failedwikifetchPath = $"{baseFolder}/failedwikifetch.json";
+        string runsPath = $"{baseFolder}/runs.json";
+       
+        string starterPath = "MMAWikiProvider.Resources.starter.json";
         ILogger<FighterStoreInitConsumer> logger;
         public FightStoreRebuilder(IFighterStoreHandler handler, ILogger<FighterStoreInitConsumer> logger, IFighterProvider provider)
         {
@@ -48,13 +53,20 @@ namespace MMAWikiProvider.Logic
 
                     watch.Start();
 
+                    if (!Directory.Exists(baseFolder))
+                        Directory.CreateDirectory(baseFolder);
+
                     var backList = Deserialize<List<Fighter>>(wikiJsonPath);
+
+                    var backListDic = backList.ToDictionary(f => f.Name, f => f);
+
+                    handler.Init(backListDic);
 
                     var listed = backList.Select(l => l.Name).Distinct();
 
                     var opponents = backList.SelectMany(l => l.Record.Select(r => r.Opponent.Name)).Distinct();
 
-                    var fighters = new ConcurrentDictionary<string, Fighter>(backList.ToDictionary(f => f.Name, f => f));
+                    var fighters = new ConcurrentDictionary<string, Fighter>(backListDic);
 
                     #region AddRecordToDic
 
@@ -81,7 +93,8 @@ namespace MMAWikiProvider.Logic
 
                     #endregion
 
-                    var names = Deserialize<List<string>>(missingPath).Distinct();
+                    var names = File.Exists(missingPath) ? Deserialize<List<string>>(missingPath).Distinct() : 
+                                                           JsonSerializer.Deserialize<List<string>>(EmbeddedResource.GetResourceFileAsString(starterPath));
 
                     var failedWikiBag = new ConcurrentBag<string>(Deserialize<List<string>>(failedwikifetchPath));
 
@@ -92,8 +105,9 @@ namespace MMAWikiProvider.Logic
                                       .Except(failedWikiBag)
                                       .Except(nameDesambiguation);
 
-                    var cont = 0;
                     var snamesCount = snames.Count();
+
+                    #region Spin
 
                     async Task Spin(string fname)
                     {
@@ -126,6 +140,8 @@ namespace MMAWikiProvider.Logic
                         }
                     }
 
+                    #endregion
+
                     await Task.WhenAll(snames.Select(s => Spin(s)));
 
                     handler.Init(fighters);
@@ -154,25 +170,13 @@ namespace MMAWikiProvider.Logic
                     logger.LogInformation(JsonSerializer.Serialize(run));
 
                     //Serialize
-                    File.WriteAllText(runsPath, JsonSerializer.Serialize(runs, new JsonSerializerOptions()
-                    {
-                        WriteIndented = true
-                    }));
+                    Serialize(runsPath, runs);
 
-                    File.WriteAllText(missingPath, JsonSerializer.Serialize(missing, new JsonSerializerOptions()
-                    {
-                        WriteIndented = true
-                    }));
+                    Serialize(missingPath, missing);
 
-                    File.WriteAllText(wikiJsonPath, JsonSerializer.Serialize(list, new JsonSerializerOptions()
-                    {
-                        WriteIndented = true
-                    }));
+                    Serialize(wikiJsonPath, list);
 
-                    File.WriteAllText(failedwikifetchPath, JsonSerializer.Serialize(auxFailedWikiList, new JsonSerializerOptions()
-                    {
-                        WriteIndented = true
-                    }));
+                    Serialize(failedwikifetchPath, auxFailedWikiList);
 
                     if (run.Missing == 0)
                         break;
@@ -194,13 +198,18 @@ namespace MMAWikiProvider.Logic
             public double ElapsedSeconds { get; set; }
         }
 
+        void Serialize<T>(string path, T value)
+        {
+            File.WriteAllText(path, JsonSerializer.Serialize(value, new JsonSerializerOptions()
+            {
+                WriteIndented = true
+            }));
+        }
+
         T Deserialize<T>(string path) where T : new()
         {
             if (!File.Exists(path))
-            {
-                //File.Create(path);
                 return new T();
-            }
 
             return JsonSerializer.Deserialize<T>(File.ReadAllText(path));
         }

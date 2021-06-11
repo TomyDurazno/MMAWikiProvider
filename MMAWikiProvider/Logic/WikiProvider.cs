@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MMAWikiProvider.Models;
+using MMAWikiProvider.Extensions;
 
 namespace MMAWikiProvider.Logic
 {

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MMAWikiProvider
+namespace MMAWikiProvider.Extensions
 {
     public static class Extensions
     {
@@ -35,6 +38,26 @@ namespace MMAWikiProvider
         public static TimeSpan Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, TimeSpan> func)
         {
             return new TimeSpan(source.Sum(item => func(item).Ticks));
+        }        
+    }
+    public static class EmbeddedResource
+    {
+        public static string GetResourceFileAsString(string namespaceAndFileName)
+        {
+            try
+            {
+                using (var stream = typeof(EmbeddedResource).GetTypeInfo().Assembly.GetManifestResourceStream(namespaceAndFileName))
+                using (var reader = new StreamReader(stream, Encoding.UTF8))
+                    return reader.ReadToEnd();
+            }
+
+            catch (Exception exception)
+            {
+                /*ApplicationProvider.WriteToLog<EmbeddedResource>().Error(exception.Message);
+                throw new Exception($"Failed to read Embedded Resource {namespaceAndFileName}");*/
+                return string.Empty;
+            }
         }
     }
+
 }
