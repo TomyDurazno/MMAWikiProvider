@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using MMAWikiProvider.Common;
 using MMAWikiProvider.Extensions;
 
 namespace MMAWikiProvider.Models
@@ -33,7 +34,7 @@ namespace MMAWikiProvider.Models
         public DateTime? Date { get; set; }
 
         public int? Round { get; set; }
-
+        [JsonConverter(typeof(TimeSpanToStringConverter))]
         public TimeSpan? Time { get; set; }
 
         public Location Location { get; set; }
@@ -136,6 +137,7 @@ namespace MMAWikiProvider.Models
 
         public RecordRow Clone() => new RecordRow(this);
 
+        [JsonConverter(typeof(TimeSpanToStringConverter))]
         public TimeSpan? ElapsedTime
         {
             get
@@ -274,6 +276,8 @@ namespace MMAWikiProvider.Models
         public static int Submissions(this IEnumerable<RecordRow> record) => record.Count(r => r.Method.IsSubmission());
 
         public static int KOTKO(this IEnumerable<RecordRow> record) => record.Count(r => r.Method.IsKO_TKO());
+
+        public static int NoContest(this IEnumerable<RecordRow> record) => record.Count(r => r.Method.IsNC());
 
         public static int WonOrDefendedUFCChampionship(this IEnumerable<RecordRow> record) => record.Count(r => r.Notes.DefendedUFCChampionship == true) + 
                                                                                        record.Count(r => r.Notes.WonUFCChampionship == true);

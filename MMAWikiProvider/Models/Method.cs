@@ -43,6 +43,7 @@ namespace MMAWikiProvider.Models
         }
         public bool IsSubmission()=> Type == MethodType.Submission || Type == MethodType.Technical_Submission;
         public bool IsKO_TKO() => Type == MethodType.KO || Type == MethodType.TKO;
+        public bool IsNC() => Type == MethodType.NC;
 
         public Method()
         { 

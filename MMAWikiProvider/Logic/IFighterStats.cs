@@ -17,6 +17,8 @@ namespace MMAWikiProvider.Logic
         public Task<IDictionary<string, object>> TopByDic<T>(int number, Func<Fighter, T> By);
 
         public Task<IDictionary<string, object>> TopByDic<T, K>(int number, Func<Fighter, T> By, Func<Fighter, K> Proj);
+
+        public StatsDTO Stats(string name);
     }
 
     public class FighterStats : IFighterStats
@@ -32,6 +34,27 @@ namespace MMAWikiProvider.Logic
             var fighter = fighterStore.GetFighterWithOpponents(name);
 
             return fighter.Record.Sum(a => a.Opponent.Record.WinLoseRatio());
+        }
+
+        public StatsDTO Stats(string name)
+        {
+            var fighter = fighterStore.GetFighterWithOpponents(name);
+            return new StatsDTO()
+            {
+                Name = fighter.Name,
+                Fights = fighter.Record.Count,
+                UFCFights = fighter.Record.UFCFights(),
+                TotalTime = TimeSpan.FromSeconds(fighter.Record.Select(r => r.ElapsedTime?.TotalSeconds ?? 0).Sum()),
+                AverageTime = TimeSpan.FromSeconds(fighter.Record.Select(r => r.ElapsedTime?.TotalSeconds ?? 0).Average()),
+                Wins = fighter.Record.Wins(),
+                Losses = fighter.Record.Losses(),
+                Draws = fighter.Record.Draws(),
+                Submissions = fighter.Record.Submissions(),
+                KOTKO = fighter.Record.KOTKO(),
+                NoContest = fighter.Record.NoContest(),
+                WonOrDefendedUFCChampionship = fighter.Record.WonOrDefendedUFCChampionship(),
+                WinLoseRatio = fighter.Record.WinLoseRatio(),
+            };
         }
 
         #region TopBy

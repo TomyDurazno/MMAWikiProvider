@@ -38,7 +38,17 @@ namespace MMAWikiProvider.Extensions
         public static TimeSpan Sum<TSource>(this IEnumerable<TSource> source, Func<TSource, TimeSpan> func)
         {
             return new TimeSpan(source.Sum(item => func(item).Ticks));
-        }        
+        }
+
+        public static List<T> PopRange<T>(this Stack<T> stack, int amount)
+        {
+            var result = new List<T>(amount);
+            while (amount-- > 0 && stack.Count > 0)
+            {
+                result.Add(stack.Pop());
+            }
+            return result;
+        }
     }
     public static class EmbeddedResource
     {

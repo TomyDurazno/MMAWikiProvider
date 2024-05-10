@@ -35,6 +35,18 @@ namespace MMAWikiProvider
                 });
             });
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                    });
+            });
+
             services.AddSingleton<IWikiProvider, WikiProvider>();
 
             services.AddSingleton<IFighterProvider, FighterProvider>();
@@ -44,6 +56,8 @@ namespace MMAWikiProvider
             services.AddSingleton<IFighterStats, FighterStats>();
 
             services.AddHostedService<FightStoreRebuilder>();
+            
+            services.AddSingleton<IRunsState, RunsState>();
 
             //services.AddHostedService<FighterStoreInitConsumer>();
         }
@@ -55,6 +69,8 @@ namespace MMAWikiProvider
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors("AllowAll");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

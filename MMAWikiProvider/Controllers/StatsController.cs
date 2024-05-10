@@ -15,11 +15,22 @@ namespace MMAWikiProvider.Controllers
     {
         private readonly ILogger<StatsController> _logger;
         private readonly IFighterStats stats;
+        private readonly IRunsState runsState;
 
-        public StatsController(ILogger<StatsController> logger, IFighterStats stats)
+        public StatsController(ILogger<StatsController> logger, IFighterStats stats, IRunsState runsState)
         {
             _logger = logger;
             this.stats = stats;
+            this.runsState = runsState;
+        }
+
+        [Route("stats/{name}")]
+        [HttpGet]
+        public IActionResult Stats(string name)
+        {
+            var dic = stats.Stats(name);
+
+            return Ok(dic);
         }
 
         [Route("stats/top/{number}/ufcfighters/bybuchholzratio")]
@@ -44,7 +55,7 @@ namespace MMAWikiProvider.Controllers
         [HttpGet]
         public async Task<IActionResult> TopByUFCTitleFights(int number)
         {
-            var dic = await stats.TopByDic(number, f => f.Record.Count(r => r.Notes.IsUFCChampionshipBout == true));
+            var dic = await stats.TopByDic(number, f => f.Record.WonOrDefendedUFCChampionship());
 
             return Ok(dic);
         }
@@ -134,6 +145,15 @@ namespace MMAWikiProvider.Controllers
                 return NotFound();*/
 
             return Ok(ratio);
+        }
+
+        [Route("state/runs")]
+        [HttpGet]
+        public IActionResult Runs()
+        {
+            var runs = runsState.GetRuns();
+
+            return Ok(runs);
         }
     }
 }

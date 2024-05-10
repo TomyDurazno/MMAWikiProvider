@@ -112,7 +112,8 @@ namespace MMAWikiProvider.Models
             var exp = new ExpandoObject() as IDictionary<string, object>;
 
             var grouped =  Record.Where(r => r.Notes.Bonuses.Any())
-                                 .GroupBy(r => r.Method.Type)
+                                 .SelectMany(r => r.Notes.Bonuses)
+                                 .GroupBy(b => b)
                                  .OrderByDescending(g => g.Count());
 
             exp.Add("Total", grouped.Sum(g => g.Count()));

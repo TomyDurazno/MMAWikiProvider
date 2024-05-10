@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using MMAWikiProvider.Models;
 using MMAWikiProvider.Extensions;
+using Microsoft.Extensions.Configuration;
 
 namespace MMAWikiProvider.Logic
 {
@@ -24,14 +26,22 @@ namespace MMAWikiProvider.Logic
         string missingPath = $"{baseFolder}/missing.json";
         string failedwikifetchPath = $"{baseFolder}/failedwikifetch.json";
         string runsPath = $"{baseFolder}/runs.json";
-       
         string starterPath = "MMAWikiProvider.Resources.starter.json";
+        bool rebuildOnRestart = false;
+        bool rebuildFlag = false;
+        int? IOBatchingSize;
+
         ILogger<FighterStoreInitConsumer> logger;
-        public FightStoreRebuilder(IFighterStoreHandler handler, ILogger<FighterStoreInitConsumer> logger, IFighterProvider provider)
+        IRunsState runsState;
+
+        public FightStoreRebuilder(IFighterStoreHandler handler, ILogger<FighterStoreInitConsumer> logger, IFighterProvider provider, IConfiguration configuration, IRunsState runsState)
         {
             this.handler = handler;
             this.logger = logger;
             this.fighterProvider = provider;
+            this.runsState = runsState;
+            rebuildOnRestart = bool.TryParse(configuration["RebuildStoreOnStart"], out var output) ? output : false;
+            IOBatchingSize = int.TryParse(configuration["IOBatchingSize"], out var io) ? io : default;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,12 +59,19 @@ namespace MMAWikiProvider.Logic
             {
                 try
                 {
-                    var watch = new Stopwatch();
-
-                    watch.Start();
+                    if (rebuildOnRestart && !rebuildFlag)
+                    {
+                        logger.LogInformation($"setting RebuildStoreOnStart is set to {rebuildOnRestart}, rebuilding store");
+                        DeleteDirectory(baseFolder);
+                        rebuildFlag = true;
+                    }
 
                     if (!Directory.Exists(baseFolder))
                         Directory.CreateDirectory(baseFolder);
+
+                    var runs = Deserialize<List<Runs>>(runsPath);
+
+                    runsState.SetRuns(runs);
 
                     var backList = Deserialize<List<Fighter>>(wikiJsonPath);
 
@@ -84,7 +101,7 @@ namespace MMAWikiProvider.Logic
 
                             if (fighters.TryAdd(opp.Name, opp))
                             {
-                                logger.LogInformation(JsonSerializer.Serialize(new { Added = opp.Name }));
+                                logger.LogInformation(Serialize(new { Added = opp.Name }));
                             }
                         }
 
@@ -100,12 +117,6 @@ namespace MMAWikiProvider.Logic
 
                     var nameDesambiguation = listed.Where(l => l.Contains("_(fighter)"))
                                                    .Select(n => n.Replace("_(fighter)", string.Empty));
-
-                    var snames = names.Except(listed)
-                                      .Except(failedWikiBag)
-                                      .Except(nameDesambiguation);
-
-                    var snamesCount = snames.Count();
 
                     #region Spin
 
@@ -129,7 +140,7 @@ namespace MMAWikiProvider.Logic
 
                             if (fighters.TryAdd(fighter.Name, fighter))
                             {
-                                logger.LogInformation(JsonSerializer.Serialize(new { Added = fighter.Name }));
+                                logger.LogInformation(Serialize(new { Added = fighter.Name }));
 
                                 await AddRecordToDic(fighter);
                             }
@@ -142,44 +153,66 @@ namespace MMAWikiProvider.Logic
 
                     #endregion
 
-                    await Task.WhenAll(snames.Select(s => Spin(s)));
-
-                    handler.Init(fighters);
-
-                    var list = fighters.Select(f => f.Value)
-                                       .ToList();
-
-                    var missing = list.SelectMany(o => o.Record.Select(r => r.Opponent.Name))
-                                      .Except(listed)
+                    var snames = names.Except(listed)
                                       .Except(failedWikiBag)
                                       .Except(nameDesambiguation);
 
-                    var auxFailedWikiList = failedWikiBag.ToList();
+                    var snamesCount = snames.Count();
 
-                    var runs = Deserialize<List<Runs>>(runsPath);
-
-                    var run = new Runs {
-                        InList = list.Count(),
-                        Missing = missing.Count(),
-                        FailedWiki = auxFailedWikiList.Count(),
-                        ElapsedSeconds = watch.Elapsed.TotalSeconds
-                    };
-
-                    runs.Add(run);
-
-                    logger.LogInformation(JsonSerializer.Serialize(run));
-
-                    //Serialize
-                    Serialize(runsPath, runs);
-
-                    Serialize(missingPath, missing);
-
-                    Serialize(wikiJsonPath, list);
-
-                    Serialize(failedwikifetchPath, auxFailedWikiList);
-
-                    if (run.Missing == 0)
+                    var stack = new Stack<string>(snames);
+                    
+                    if(snamesCount == 0)
+                    {
+                        logger.LogInformation($"List size: {snamesCount}");
+                        //Break main loop
                         break;
+                    }
+
+                    while(stack.Any())
+                    {
+                        var watch = Stopwatch.StartNew();
+
+                        var round = IOBatchingSize.HasValue ? stack.PopRange(IOBatchingSize.Value) : stack.PopRange(snamesCount);
+
+                        await Task.WhenAll(round.Select(s => Spin(s)));
+
+                        handler.Init(fighters);
+
+                        var list = fighters.Select(f => f.Value)
+                                           .ToList();
+
+                        var missing = list.SelectMany(o => o.Record.Select(r => r.Opponent.Name))
+                                          .Except(listed)
+                                          .Except(failedWikiBag)
+                                          .Except(nameDesambiguation);
+
+                        var auxFailedWikiList = failedWikiBag.ToList();
+
+                        var run = new Runs {
+                            InList = list.Count(),
+                            Missing = missing.Count(),
+                            FailedWiki = auxFailedWikiList.Count(),
+                            ElapsedSeconds = watch.Elapsed.TotalSeconds
+                        };
+
+                        runs.Add(run);
+
+                        runsState.SetRuns(runs);
+
+                        logger.LogInformation(Serialize(run));
+
+                        //Serialize
+                        SerializeToFile(runsPath, runs);
+
+                        SerializeToFile(missingPath, missing);
+
+                        SerializeToFile(wikiJsonPath, list);
+
+                        SerializeToFile(failedwikifetchPath, auxFailedWikiList);
+
+                        if (run.Missing == 0)
+                            break;
+                    }
 
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
@@ -190,19 +223,22 @@ namespace MMAWikiProvider.Logic
             }
         }
 
-        class Runs
+        string Serialize<T>(T value)
         {
-            public int InList { get; set; }
-            public int Missing { get; set; }
-            public int FailedWiki { get; set; }
-            public double ElapsedSeconds { get; set; }
+            var jso = new JsonSerializerOptions()
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+ 
+            return JsonSerializer.Serialize(value, jso);
         }
 
-        void Serialize<T>(string path, T value)
+        void SerializeToFile<T>(string path, T value)
         {
             File.WriteAllText(path, JsonSerializer.Serialize(value, new JsonSerializerOptions()
             {
-                WriteIndented = true
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             }));
         }
 
@@ -212,6 +248,30 @@ namespace MMAWikiProvider.Logic
                 return new T();
 
             return JsonSerializer.Deserialize<T>(File.ReadAllText(path));
+        }
+
+        void DeleteDirectory(string target_dir)
+        {
+            if(!Directory.Exists(target_dir))
+            {
+                return;
+            }
+
+            var files = Directory.GetFiles(target_dir);
+            var dirs = Directory.GetDirectories(target_dir);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(target_dir, false);
         }
     }
 }
