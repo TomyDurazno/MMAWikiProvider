@@ -31,10 +31,10 @@ namespace MMAWikiProvider.Logic
         bool rebuildFlag = false;
         int? IOBatchingSize;
 
-        ILogger<FighterStoreInitConsumer> logger;
+        ILogger<FightStoreRebuilder> logger;
         IRunsState runsState;
 
-        public FightStoreRebuilder(IFighterStoreHandler handler, ILogger<FighterStoreInitConsumer> logger, IFighterProvider provider, IConfiguration configuration, IRunsState runsState)
+        public FightStoreRebuilder(IFighterStoreHandler handler, ILogger<FightStoreRebuilder> logger, IFighterProvider provider, IConfiguration configuration, IRunsState runsState)
         {
             this.handler = handler;
             this.logger = logger;

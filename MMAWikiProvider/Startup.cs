@@ -58,8 +58,6 @@ namespace MMAWikiProvider
             services.AddHostedService<FightStoreRebuilder>();
             
             services.AddSingleton<IRunsState, RunsState>();
-
-            //services.AddHostedService<FighterStoreInitConsumer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
